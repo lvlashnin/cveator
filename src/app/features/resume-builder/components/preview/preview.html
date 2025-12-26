@@ -1,1 +1,188 @@
-<p>preview works!</p>
+@if (formData(); as data) {
+<div class="resume-paper" id="resume-preview">
+
+  <aside class="sidebar">
+    <div class="profile-photo-placeholder">
+      <span>{{ data.personalDetails.fullName.slice(0, 1) }}</span>
+    </div>
+
+    <section class="section contacts">
+      <h3>Contact</h3>
+      <ul class="contact-list">
+        @if (data.personalDetails.email) {
+        <li>
+          <span class="icon">✉</span>
+          <span>{{ data.personalDetails.email }}</span>
+        </li>
+        }
+        @if (data.personalDetails.phone) {
+        <li>
+          <span class="icon">📞</span>
+          <span>{{ data.personalDetails.phone }}</span>
+        </li>
+        }
+        @if (data.personalDetails.address) {
+        <li>
+          <span class="icon">📍</span>
+          <span>{{ data.personalDetails.address }}</span>
+        </li>
+        }
+      </ul>
+    </section>
+
+    @if (data.skills.length > 0) {
+    <section class="section">
+      <h3>Skills</h3>
+      <ul class="skills-list">
+        @for (skill of data.skills; track $index) {
+        <li>
+          <span class="skill-name">{{ skill.name }}</span>
+          <span class="skill-level">{{ skill.level }}</span>
+        </li>
+        }
+      </ul>
+    </section>
+    }
+
+    @if (data.languages.length > 0) {
+    <section class="section">
+      <h3>Languages</h3>
+      <ul class="skills-list">
+        @for (lang of data.languages; track $index) {
+        <li>
+          <strong>{{ lang.language }}</strong> {{ lang.level }}
+        </li>
+        }
+      </ul>
+    </section>
+    }
+
+    @if (data.hobbies.length > 0) {
+    <section class="section">
+      <h3>Hobbies</h3>
+      <ul class="tags-list">
+        @for (hobb of data.hobbies; track $index) {
+        <li>{{ hobb.name }}</li>
+        }
+      </ul>
+    </section>
+    }
+
+    @if (data.references?.length) {
+    <section class="section">
+      <h3>References</h3>
+      @for (ref of data.references; track $index) {
+      <div class="reference-item">
+        <div class="ref-name">{{ ref.name }}</div>
+        <div class="ref-company">{{ ref.company }}</div>
+        <div class="ref-contact">{{ ref.email }}</div>
+      </div>
+      }
+    </section>
+    }
+  </aside>
+
+  <main class="main-content">
+
+    <header class="resume-header">
+      <h1>{{ data.personalDetails.fullName }}</h1>
+      <h2 class="job-title">{{ data.personalDetails.title }}</h2>
+
+      @if (data.personalDetails.summary) {
+      <p class="summary">{{ data.personalDetails.summary }}</p>
+      }
+
+      @if (data.profile) {
+      <div class="profile-section">
+        <p>{{ data.profile }}</p>
+      </div>
+      }
+    </header>
+
+    @if (data.experience.length) {
+    <section class="main-section">
+      <h3 class="section-title">Experience</h3>
+      @for (job of data.experience; track $index) {
+      <div class="experience-item">
+        <div class="item-header">
+          <span class="role">{{ job.role }}</span>
+          @if (job.duration) {
+          <span class="date">{{ job.duration }} years</span>
+          }
+        </div>
+        <div class="company">{{ job.company }}</div>
+      </div>
+      }
+    </section>
+    }
+
+    @if (data.internships?.length) {
+    <section class="main-section">
+      <h3 class="section-title">Internships</h3>
+      @for (intern of data.internships; track $index) {
+      <div class="experience-item">
+        <div class="item-header">
+          <span class="role">{{ intern.role }}</span>
+          <span class="date">{{ intern.duration }} months</span>
+        </div>
+        <div class="company">{{ intern.company }}</div>
+      </div>
+      }
+    </section>
+    }
+
+    @if (data.education.length) {
+    <section class="main-section">
+      <h3 class="section-title">Education</h3>
+      @for (edu of data.education; track $index) {
+      <div class="education-item">
+        <div class="item-header">
+          <span class="degree">{{ edu.degree }}</span>
+          @if (edu.year) {
+          <span class="date">{{ edu.year }}</span>
+          }
+        </div>
+        <div class="university">{{ edu.university }}</div>
+      </div>
+      }
+    </section>
+    }
+
+    @if (data.certificates?.length) {
+    <section class="main-section">
+      <h3 class="section-title">Certificates</h3>
+      <ul class="simple-list">
+        @for (cert of data.certificates; track $index) {
+        <li>
+          <strong>{{ cert.name }}</strong> <span class="text-muted">({{ cert.date }})</span>
+        </li>
+        }
+      </ul>
+    </section>
+    }
+
+    @if (data.achievements?.length) {
+    <section class="main-section">
+      <h3 class="section-title">Achievements</h3>
+      <ul class="bullet-list">
+        @for (ach of data.achievements; track $index) {
+        <li>{{ ach }}</li>
+        }
+      </ul>
+    </section>
+    }
+
+    @if (data.signature) {
+    <div class="signature-section">
+      <p class="sign-text">{{ data.signature }}</p>
+      <div class="sign-line">Signature</div>
+    </div>
+    }
+
+  </main>
+</div>
+} @else {
+<section class="prepreview">
+  <h3 class="prepreview_title">Your CV might be here...</h3>
+</section>
+}

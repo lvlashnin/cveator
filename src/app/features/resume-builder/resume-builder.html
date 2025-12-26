@@ -1,1 +1,33 @@
-<p>resume-builder works!</p>
+<div class="builder-container">
+
+  <div class="editor-panel">
+
+    <header class="editor-header">
+      <button mat-icon-button routerLink="/">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h2>Editor</h2>
+    </header>
+
+    <div class="scrollable-content">
+      <app-editor></app-editor>
+    </div>
+  </div>
+
+  <div class="preview-panel">
+
+    <header class="preview-header">
+      <button mat-raised-button color="primary" (click)="downloadPdf()" [disabled]="isPdfDownloading">
+        @if (!isPdfDownloading) {
+        <span>Download your CV in PDF</span>
+        } @else {
+        <span>Creating your CV..</span>
+        }
+      </button>
+    </header>
+
+    <div class="preview-paper">
+      <app-preview></app-preview>
+    </div>
+  </div>
+</div>

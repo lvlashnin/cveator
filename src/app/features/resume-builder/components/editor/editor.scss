@@ -1,0 +1,68 @@
+.editor-container {
+  padding-bottom: 50px;
+}
+
+mat-expansion-panel {
+  margin-bottom: 10px;
+  border-radius: 8px;
+
+  &.mat-expanded {
+    margin-bottom: 16px;
+  }
+}
+
+.panel-icon {
+  margin-right: 12px;
+  color: #666;
+}
+
+.delete-icon {
+  margin-left: auto;
+  opacity: 0.6;
+  font-size: 20px;
+
+  &:hover {
+    opacity: 1;
+    color: #fd0000;
+  }
+}
+
+.placeholder-text {
+  color: #999;
+  font-style: italic;
+  padding-inline: 10px;
+}
+
+.add-sections-area {
+  margin-top: 40px;
+  padding-inline: 10px;
+
+  .buttons-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .actions-toolbar {
+    margin-top: 40px;
+  }
+
+  .add-btn {
+    border-radius: 20px;
+    border-color: #ddd;
+    color: #444;
+
+    ::ng-deep .mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    &:hover {
+      background-color: #f0f0f0f0;
+      border-color: #bbb;
+    }
+  }
+}
