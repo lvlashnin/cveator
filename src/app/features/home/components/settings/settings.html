@@ -1,0 +1,22 @@
+<div [formGroup]="personalDetails" class="form-grid">
+  <mat-form-field>
+    <mat-label>Full Name</mat-label>
+    <input matInput formControlName="fullName">
+  </mat-form-field>
+  <mat-form-field floatLabel="always">
+    <mat-label>Email</mat-label>
+    <input matInput formControlName="workEmail" type="email" placeholder="example@mail.com">
+    <mat-error>Email is required</mat-error>
+  </mat-form-field>
+  <mat-form-field floatLabel="always">
+    <mat-label>Phone</mat-label>
+    <input matInput formControlName="phone" type="tel" mask="(000) 000-00-00" [showMaskTyped]="true" prefix="+38 "
+      [dropSpecialCharacters]="false">
+    <mat-error>Phone is required</mat-error>
+  </mat-form-field>
+  <mat-form-field class="full-width">
+    <mat-label>Address</mat-label>
+    <textarea matInput formControlName="address"></textarea>
+  </mat-form-field>
+
+</div>

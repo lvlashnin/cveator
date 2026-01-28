@@ -1,36 +1,36 @@
-@if (formData(); as data) {
+@if (data(); as data) {
 <div class="resume-paper" id="resume-preview">
 
   <aside class="sidebar">
     <div class="profile-photo-placeholder">
-      <span>{{ data.personalDetails.fullName.slice(0, 1) }}</span>
+      <span>{{ data?.personalDetails?.fullName?.slice(0, 1) }}</span>
     </div>
 
     <section class="section contacts">
       <h3>Contact</h3>
       <ul class="contact-list">
-        @if (data.personalDetails.email) {
+        @if (data.personalDetails?.workEmail) {
         <li>
           <span class="icon">✉</span>
-          <span>{{ data.personalDetails.email }}</span>
+          <span>{{ data.personalDetails?.workEmail }}</span>
         </li>
         }
-        @if (data.personalDetails.phone) {
+        @if (data.personalDetails?.phone) {
         <li>
           <span class="icon">📞</span>
-          <span>{{ data.personalDetails.phone }}</span>
+          <span>{{ data.personalDetails?.phone }}</span>
         </li>
         }
-        @if (data.personalDetails.address) {
+        @if (data.personalDetails?.address) {
         <li>
           <span class="icon">📍</span>
-          <span>{{ data.personalDetails.address }}</span>
+          <span>{{ data.personalDetails?.address }}</span>
         </li>
         }
       </ul>
     </section>
 
-    @if (data.skills.length > 0) {
+    @if (data.skills?.length) {
     <section class="section">
       <h3>Skills</h3>
       <ul class="skills-list">
@@ -44,7 +44,7 @@
     </section>
     }
 
-    @if (data.languages.length > 0) {
+    @if (data.languages?.length) {
     <section class="section">
       <h3>Languages</h3>
       <ul class="skills-list">
@@ -57,12 +57,37 @@
     </section>
     }
 
-    @if (data.hobbies.length > 0) {
+    @if (data.hobbies?.length) {
     <section class="section">
       <h3>Hobbies</h3>
       <ul class="tags-list">
         @for (hobb of data.hobbies; track $index) {
         <li>{{ hobb.name }}</li>
+        }
+      </ul>
+    </section>
+    }
+
+    <!-- @if (data.activities?.length) {
+    <section class="section">
+      <h3>Activities</h3>
+      <ul class="skills-list">
+        @for (act of data.activities; track $index) {
+        <li>
+          <strong>{{ act.name }}</strong><br>
+          <span class="text-muted">{{ act.role }}</span>
+        </li>
+        }
+      </ul>
+    </section>
+    }
+
+    @if (data.qualities?.length) {
+    <section class="section">
+      <h3>Qualities</h3>
+      <ul class="tags-list">
+        @for (qual of data.qualities; track $index) {
+        <li>{{ qual.name }}</li>
         }
       </ul>
     </section>
@@ -79,27 +104,27 @@
       </div>
       }
     </section>
-    }
+    } -->
   </aside>
 
   <main class="main-content">
 
     <header class="resume-header">
-      <h1>{{ data.personalDetails.fullName }}</h1>
-      <h2 class="job-title">{{ data.personalDetails.title }}</h2>
+      <h1>{{ data.personalDetails?.fullName }}</h1>
+      <!-- <h2 class="job-title">{{ data.personalDetails?.title }}</h2> -->
 
-      @if (data.personalDetails.summary) {
+      <!-- @if (data.personalDetails.summary) {
       <p class="summary">{{ data.personalDetails.summary }}</p>
-      }
+      } -->
 
-      @if (data.profile) {
+      <!-- @if (data.profile) {
       <div class="profile-section">
         <p>{{ data.profile }}</p>
       </div>
-      }
+      } -->
     </header>
 
-    @if (data.experience.length) {
+    @if (data.experience?.length) {
     <section class="main-section">
       <h3 class="section-title">Experience</h3>
       @for (job of data.experience; track $index) {
@@ -116,7 +141,7 @@
     </section>
     }
 
-    @if (data.internships?.length) {
+    <!-- @if (data.internships?.length) {
     <section class="main-section">
       <h3 class="section-title">Internships</h3>
       @for (intern of data.internships; track $index) {
@@ -129,18 +154,18 @@
       </div>
       }
     </section>
-    }
+    } -->
 
-    @if (data.education.length) {
+    @if (data.education?.length) {
     <section class="main-section">
       <h3 class="section-title">Education</h3>
       @for (edu of data.education; track $index) {
       <div class="education-item">
         <div class="item-header">
           <span class="degree">{{ edu.degree }}</span>
-          @if (edu.year) {
-          <span class="date">{{ edu.year }}</span>
-          }
+          <span class="date">
+            {{ edu.startDate | date:'MMM yyyy' }} - {{ edu.endDate | date:'MMM yyyy' }}
+          </span>
         </div>
         <div class="university">{{ edu.university }}</div>
       </div>
@@ -148,7 +173,24 @@
     </section>
     }
 
-    @if (data.certificates?.length) {
+    <!-- @if (data.courses?.length) {
+    <section class="main-section">
+      <h3 class="section-title">Courses</h3>
+      @for (course of data.courses; track $index) {
+      <div class="education-item">
+        <div class="item-header">
+          <span class="degree">{{ course.title }}</span>
+          @if (course.completionDate) {
+          <span class="date">{{ course.completionDate }}</span>
+          }
+        </div>
+        <div class="university">{{ course.provider }}</div>
+      </div>
+      }
+    </section>
+    } -->
+
+    <!-- @if (data.certificates?.length) {
     <section class="main-section">
       <h3 class="section-title">Certificates</h3>
       <ul class="simple-list">
@@ -159,9 +201,9 @@
         }
       </ul>
     </section>
-    }
+    } -->
 
-    @if (data.achievements?.length) {
+    <!-- @if (data.achievements?.length) {
     <section class="main-section">
       <h3 class="section-title">Achievements</h3>
       <ul class="bullet-list">
@@ -170,14 +212,16 @@
         }
       </ul>
     </section>
-    }
+    } -->
 
-    @if (data.signature) {
+    <!-- @if (data.signature?.length) {
     <div class="signature-section">
-      <p class="sign-text">{{ data.signature }}</p>
+      @for (sig of data.signature; track $index) {
+      <p class="sign-text">{{ sig.signature }}</p>
+      }
       <div class="sign-line">Signature</div>
     </div>
-    }
+    } -->
 
   </main>
 </div>

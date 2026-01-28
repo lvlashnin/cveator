@@ -1,195 +1,20 @@
 <form [formGroup]="resumeForm" class="editor-container">
   <mat-accordion displayMode="flat">
     @for (section of mainSections; track section){
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
+    <mat-expansion-panel #panel [formArrayName]="section.key" (opened)="onSectionOpen(section.key)">
+      <mat-expansion-panel-header
+        [class.invalid-panel]="getSectionControl(section.key)?.invalid && getSectionControl(section.key)?.touched && !panel.expanded">
         <mat-panel-title>
           <mat-icon class="panel-icon">{{section.icon}}</mat-icon>
           {{section.label}}
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
-        <div class="form-section-content">
-          @switch (section.key) {
-
-          @case ('personalDetails') {
-          <div formGroupName="personalDetails" class="form-grid">
-            <mat-form-field>
-              <mat-label>Full Name</mat-label>
-              <input matInput formControlName="fullName">
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>Email</mat-label>
-              <input matInput formControlName="email" type="email">
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>Phone</mat-label>
-              <input matInput formControlName="phone" type="tel">
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>Title</mat-label>
-              <input matInput formControlName="title">
-            </mat-form-field>
-            <mat-form-field class="full-width">
-              <mat-label>Address</mat-label>
-              <textarea matInput formControlName="address"></textarea>
-            </mat-form-field>
-          </div>
-          }
-
-          @case ('education') {
-          <div formArrayName="education">
-            @for (control of getFormArray('education').controls; track $index) {
-            <div [formGroupName]="$index" class="form-array-item">
-              <h4>Education #{{$index + 1}}</h4>
-              <div class="form-grid">
-                <mat-form-field>
-                  <mat-label>School / University</mat-label>
-                  <input matInput formControlName="university"> </mat-form-field>
-                <mat-form-field>
-                  <mat-label>Degree</mat-label>
-                  <input matInput formControlName="degree">
-                </mat-form-field>
-                <mat-form-field>
-                  <mat-label>Year</mat-label>
-                  <input matInput formControlName="year">
-                </mat-form-field>
-              </div>
-              <button mat-icon-button color="warn" (click)="removeItem('education', $index)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-            }
-            <div class="add-item-action">
-              <button mat-stroked-button color="primary" (click)="addItem('education', createEducationGroup)">
-                <mat-icon>add</mat-icon> Add Education
-              </button>
-            </div>
-          </div>
-          }
-
-          @case ('experience') {
-          <div formArrayName="experience">
-            @for (control of getFormArray('experience').controls; track $index) {
-            <div [formGroupName]="$index" class="form-array-item">
-              <h4>Job #{{$index + 1}}</h4>
-              <div class="form-grid">
-                <mat-form-field>
-                  <mat-label>Company</mat-label>
-                  <input matInput formControlName="company">
-                </mat-form-field>
-                <mat-form-field>
-                  <mat-label>Role</mat-label>
-                  <input matInput formControlName="role">
-                </mat-form-field>
-                <mat-form-field>
-                  <mat-label>Duration</mat-label>
-                  <input matInput formControlName="duration">
-                </mat-form-field>
-              </div>
-              <button mat-icon-button color="warn" (click)="removeItem('experience', $index)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-            }
-            <div class="add-item-action">
-              <button mat-stroked-button color="primary" (click)="addItem('experience', createExperienceGroup)">
-                <mat-icon>add</mat-icon> Add Job
-              </button>
-            </div>
-          </div>
-          }
-
-          @case ('skills') {
-          <div formArrayName="skills">
-            @for (control of getFormArray('skills').controls; track $index) {
-            <div [formGroupName]="$index" class="form-array-item">
-              <h4>Skill #{{$index + 1}}</h4>
-              <div class="form-grid">
-                <mat-form-field>
-                  <mat-label>Skill Name</mat-label>
-                  <input matInput formControlName="name">
-                </mat-form-field>
-                <mat-form-field>
-                  <mat-label>Level</mat-label>
-                  <input matInput formControlName="level">
-                </mat-form-field>
-              </div>
-              <button mat-icon-button color="warn" (click)="removeItem('skills', $index)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-            }
-            <div class="add-item-action">
-              <button mat-stroked-button color="primary" (click)="addItem('skills', createSkillGroup)">
-                <mat-icon>add</mat-icon> Add Skill
-              </button>
-            </div>
-          </div>
-          }
-
-          @case ('languages') {
-          <div formArrayName="languages">
-            @for (control of getFormArray('languages').controls; track $index) {
-            <div [formGroupName]="$index" class="form-array-item">
-              <h4>Language #{{$index + 1}}</h4>
-              <div class="form-grid">
-                <mat-form-field>
-                  <mat-label>Language</mat-label>
-                  <input matInput formControlName="language">
-                </mat-form-field>
-                <mat-form-field>
-                  <mat-label>Level</mat-label>
-                  <input matInput formControlName="level">
-                </mat-form-field>
-              </div>
-              <button mat-icon-button color="warn" (click)="removeItem('languages', $index)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-            }
-            <div class="add-item-action">
-              <button mat-stroked-button color="primary" (click)="addItem('languages', createLanguageGroup)">
-                <mat-icon>add</mat-icon> Add Language
-              </button>
-            </div>
-          </div>
-          }
-
-          @case ('hobbies') {
-          <div formArrayName="hobbies">
-            @for (control of getFormArray('hobbies').controls; track $index) {
-            <div [formGroupName]="$index" class="form-array-item">
-              <div class="form-grid">
-                <mat-form-field class="full-width">
-                  <mat-label>Hobby</mat-label>
-                  <input matInput formControlName="name">
-                </mat-form-field>
-              </div>
-              <button mat-icon-button color="warn" (click)="removeItem('hobbies', $index)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-            }
-            <div class="add-item-action">
-              <button mat-stroked-button color="primary" (click)="addItem('hobbies', createHobbieGroup)">
-                <mat-icon>add</mat-icon> Add Hobby
-              </button>
-            </div>
-          </div>
-          }
-
-          @default {
-          <div class="empty-state">
-            <p>Content for {{section.label}} is not configured yet.</p>
-          </div>
-          }
-          }
-        </div>
+        <ng-container *ngTemplateOutlet="sectionTemplate; context: {section: section}"></ng-container>
       </ng-template>
     </mat-expansion-panel>
     }
-    @for (section of additionalSections; track section) {
+    <!-- @for (section of additionalSections; track section) {
     @if(hasSection(section.key)){
     <mat-expansion-panel>
       <mat-expansion-panel-header>
@@ -197,18 +22,485 @@
           <mat-icon class="panel-icon">{{section.icon}}</mat-icon>
           {{section.label}}
         </mat-panel-title>
-        <mat-icon (click)="removeSection(section.key); $event.stopPropagation()">close</mat-icon>
+        <mat-icon class="btn-delete" (click)="removeSection(section.key); $event.stopPropagation()">close</mat-icon>
       </mat-expansion-panel-header>
-      <p class="placeholder-text">form for {{section.label}}</p>
+      <ng-template matExpansionPanelContent>
+        <ng-container *ngTemplateOutlet="sectionTemplate; context: {section: section}"></ng-container>
+      </ng-template>
     </mat-expansion-panel>
     }
-    }
+    } -->
   </mat-accordion>
-  <div class="add-sections-area">
+
+  <ng-template #sectionTemplate let-section="section">
+    <div class="form-section-content">
+      @switch (section.key) {
+
+      <!-- @case ('personalDetails') {
+      <div formGroupName="personalDetails" class="form-grid">
+        <mat-form-field>
+          <mat-label>Full Name</mat-label>
+          <input matInput formControlName="fullName">
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="workEmail" type="email" placeholder="example@mail.com">
+          <mat-error>Email is required</mat-error>
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>Phone</mat-label>
+          <input matInput formControlName="phone" type="tel" mask="(000) 000-00-00" [showMaskTyped]="true" prefix="+38 "
+            [dropSpecialCharacters]="false">
+          <mat-error>Phone is required</mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <mat-label>Address</mat-label>
+          <textarea matInput formControlName="address"></textarea>
+        </mat-form-field>
+      </div>
+      } -->
+
+      @case ('education') {
+      <div formArrayName="education">
+        @for (control of getFormArray('education').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <h4>Education #{{$index + 1}}</h4>
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field>
+                <mat-label>University</mat-label>
+                <input matInput formControlName="university">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Degree</mat-label>
+                <input matInput formControlName="degree">
+              </mat-form-field>
+              <div class="dates-grid"> <mat-form-field appearance="outline">
+                  <mat-label>Start Date</mat-label>
+                  <input matInput [matDatepicker]="pickerStart" formControlName="startDate">
+                  <mat-hint>MM/DD/YYYY</mat-hint>
+                  <mat-datepicker-toggle matIconSuffix [for]="pickerStart"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerStart></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>End Date</mat-label>
+                  <input matInput [matDatepicker]="pickerEnd" formControlName="endDate">
+                  <mat-hint>MM/DD/YYYY</mat-hint>
+                  <mat-datepicker-toggle matIconSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerEnd></mat-datepicker>
+                </mat-form-field>
+
+              </div>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('education', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('education')">
+            <mat-icon>add</mat-icon> Add Education
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('experience') {
+      <div formArrayName="experience">
+        @for (control of getFormArray('experience').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <h4>Job #{{$index + 1}}</h4>
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field>
+                <mat-label>Company</mat-label>
+                <input matInput formControlName="company">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Role</mat-label>
+                <input matInput formControlName="role">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Duration</mat-label>
+                <input matInput formControlName="duration">
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('experience', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('experience')">
+            <mat-icon>add</mat-icon> Add Job
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('skills') {
+      <div formArrayName="skills">
+        @for (control of getFormArray('skills').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <h4>Skill #{{$index + 1}}</h4>
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field>
+                <mat-label>Skill Name</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Level</mat-label>
+                <input matInput formControlName="level">
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('skills', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('skills')">
+            <mat-icon>add</mat-icon> Add Skill
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('languages') {
+      <div formArrayName="languages">
+        @for (control of getFormArray('languages').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <h4>Language #{{$index + 1}}</h4>
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field>
+                <mat-label>Language</mat-label>
+                <input matInput formControlName="language">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Level</mat-label>
+                <input matInput formControlName="level">
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('languages', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('languages')">
+            <mat-icon>add</mat-icon> Add Language
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('hobbies') {
+      <div formArrayName="hobbies">
+        @for (control of getFormArray('hobbies').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field class="full-width">
+                <mat-label>Hobby</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('hobbies', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('hobbies')">
+            <mat-icon>add</mat-icon> Add Hobby
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('profile') {
+      <div class="form-grid">
+        <mat-form-field class="full-width">
+          <mat-label>Profile</mat-label>
+          <textarea matInput formControlName="profile"></textarea>
+        </mat-form-field>
+      </div>
+      }
+
+      @case ('courses') {
+      <div formArrayName="courses">
+        @for (control of getFormArray('courses').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <h4>Course #{{$index + 1}}</h4>
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field>
+                <mat-label>Course Title</mat-label>
+                <input matInput formControlName="title">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Provider</mat-label>
+                <input matInput formControlName="provider">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Completion Date</mat-label>
+                <input matInput formControlName="completionDate">
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('courses', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('courses')">
+            <mat-icon>add</mat-icon> Add Course
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('internships') {
+      <div formArrayName="internships">
+        @for (control of getFormArray('internships').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <h4>Internship #{{$index + 1}}</h4>
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field>
+                <mat-label>Company</mat-label>
+                <input matInput formControlName="company">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Position</mat-label>
+                <input matInput formControlName="position">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Duration</mat-label>
+                <input matInput formControlName="duration">
+              </mat-form-field>
+              <mat-form-field class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description"></textarea>
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('internships', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('internships')">
+            <mat-icon>add</mat-icon> Add Internship
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('activities') {
+      <div formArrayName="activities">
+        @for (control of getFormArray('activities').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <h4>Activity #{{$index + 1}}</h4>
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field>
+                <mat-label>Activity Name</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Role</mat-label>
+                <input matInput formControlName="role">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Year</mat-label>
+                <input matInput formControlName="year">
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('activities', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('activities')">
+            <mat-icon>add</mat-icon> Add Activity
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('references') {
+      <div formArrayName="references">
+        @for (control of getFormArray('references').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <h4>Reference #{{$index + 1}}</h4>
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field>
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Position</mat-label>
+                <input matInput formControlName="position">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Contact (Email)</mat-label>
+                <input matInput formControlName="contact" type="email">
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('references', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('references')">
+            <mat-icon>add</mat-icon> Add Reference
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('qualities') {
+      <div formArrayName="qualities">
+        @for (control of getFormArray('qualities').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field class="full-width">
+                <mat-label>Quality</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('qualities', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('qualities')">
+            <mat-icon>add</mat-icon> Add Quality
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('certificates') {
+      <div formArrayName="certificates">
+        @for (control of getFormArray('certificates').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <h4>Certificate #{{$index + 1}}</h4>
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field>
+                <mat-label>Certificate Name</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Issuer</mat-label>
+                <input matInput formControlName="issuer">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Issue Date</mat-label>
+                <input matInput formControlName="issueDate">
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('certificates', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('certificates')">
+            <mat-icon>add</mat-icon> Add Certificate
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('achievements') {
+      <div formArrayName="achievements">
+        @for (control of getFormArray('achievements').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <h4>Achievement #{{$index + 1}}</h4>
+          <div class="input-block">
+            <div class="form-grid">
+              <mat-form-field>
+                <mat-label>Achievement Title</mat-label>
+                <input matInput formControlName="title">
+              </mat-form-field>
+              <mat-form-field class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description"></textarea>
+              </mat-form-field>
+            </div>
+            <button mat-icon-button color="warn" (click)="removeItem('achievements', $index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('achievements')">
+            <mat-icon>add</mat-icon> Add Achievement
+          </button>
+        </div>
+      </div>
+      }
+
+      @case ('signature') {
+      <div formArrayName="signature">
+        @for (control of getFormArray('signature').controls; track $index) {
+        <div [formGroupName]="$index" class="form-array-item">
+          <div class="form-grid">
+            <mat-form-field class="full-width">
+              <mat-label>Signature</mat-label>
+              <textarea matInput formControlName="signature"></textarea>
+            </mat-form-field>
+          </div>
+          <button mat-icon-button color="warn" (click)="removeItem('signature', $index)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        }
+        <div class="add-item-action">
+          <button mat-stroked-button color="primary" (click)="addItem('signature')">
+            <mat-icon>add</mat-icon> Add Signature
+          </button>
+        </div>
+      </div>
+      }
+
+      @default {
+      <div class="empty-state">
+        <p>Content for {{section.label}} is not configured yet.</p>
+      </div>
+      }
+      }
+    </div>
+  </ng-template>
+
+  <!-- <div class="add-sections-area">
     <div class="buttons-grid">
       @for (section of additionalSections; track section) {
       @if (!hasSection(section.key)){
-      <button mat-stroked-button class="add-btn" (click)="addSection(section.key)">
+      <button mat-stroked-button class="add-btn" (click)="addSection(section.key, section.createSectionGroup)">
         <mat-icon>add</mat-icon> {{section.label}}
       </button>
       }
@@ -222,5 +514,5 @@
         <mat-icon>save</mat-icon> Save Draft
       </button>
     </div>
-  </div>
+  </div> -->
 </form>

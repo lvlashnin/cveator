@@ -1,17 +1,39 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  Component,
+  inject,
+  ChangeDetectionStrategy,
+  DestroyRef,
+  OnInit,
+  ChangeDetectorRef,
+} from '@angular/core';
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  AbstractControl,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
-
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Resume } from '../../../../core/interfaces/resume';
+import {
+  Education,
+  Experience,
+  Hobby,
+  Language,
+  Resume,
+  Skill,
+} from '../../../../core/interfaces/models';
 import { ResumeService } from '../../../../core/services/resume';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, filter, Observable, of, switchMap } from 'rxjs';
 
 export interface Section {
   key: string;
@@ -31,18 +53,22 @@ export interface Section {
     MatChipsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDatepickerModule,
   ],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Editor implements OnInit, OnDestroy {
+export class Editor implements OnInit {
   private readonly fb = inject(FormBuilder);
-  private readonly destroy$ = new Subject<void>();
-  private ResumeService = inject(ResumeService);
+  private resumeService = inject(ResumeService);
+  private route = inject(ActivatedRoute);
+  private destroyRef: DestroyRef = inject(DestroyRef);
+  private changeDetectionRef = inject(ChangeDetectorRef);
+
+  private resumeId!: number;
 
   public mainSections: Section[] = [
-    { key: 'personalDetails', label: 'Personal Details', icon: 'person' },
     { key: 'education', label: 'Education', icon: 'school' },
     { key: 'experience', label: 'Experience', icon: 'work' },
     { key: 'skills', label: 'Skills', icon: 'build' },
@@ -50,129 +76,288 @@ export class Editor implements OnInit, OnDestroy {
     { key: 'hobbies', label: 'Hobbies', icon: 'sports_esports' },
   ];
 
-  public additionalSections: Section[] = [
-    { key: 'profile', label: 'Profile', icon: 'person' },
-    { key: 'courses', label: 'Courses', icon: 'school' },
-    { key: 'internships', label: 'Internships', icon: 'work' },
-    { key: 'activities', label: 'Extracurricular Activities', icon: 'accessibility_new' },
-    { key: 'references', label: 'References', icon: 'group' },
-    { key: 'qualities', label: 'Qualities', icon: 'star' },
-    { key: 'certificates', label: 'Certificates', icon: 'workspace_premium' },
-    { key: 'achievements', label: 'Achievements', icon: 'emoji_events' },
-    { key: 'signature', label: 'Signature', icon: 'draw' },
-  ];
-
-  public createEducationGroup = (): FormGroup => {
+  public createEducationGroup = (data?: Education): FormGroup => {
     return this.fb.group({
-      university: ['', Validators.required],
-      degree: ['', Validators.required],
-      year: [''],
+      id: [data?.id || null],
+      resumeId: [this.resumeId],
+      university: [data?.university || '', Validators.required],
+      degree: [data?.degree || '', Validators.required],
+      startDate: [data?.startDate || null],
+      endDate: [data?.endDate || null],
     });
   };
 
-  public createExperienceGroup = (): FormGroup => {
+  public createExperienceGroup = (data?: Experience): FormGroup => {
     return this.fb.group({
-      company: ['', Validators.required],
-      role: ['', Validators.required],
-      duration: ['', Validators.required],
+      id: [data?.id || null],
+      resumeId: [this.resumeId],
+      company: [data?.company || '', Validators.required],
+      role: [data?.role || '', Validators.required],
+      duration: [data?.duration || '', Validators.required],
+      description: [data?.description || ''],
     });
   };
 
-  public createSkillGroup = (): FormGroup => {
+  public createSkillGroup = (data?: Skill): FormGroup => {
     return this.fb.group({
-      name: ['', Validators.required],
-      level: ['', Validators.required],
+      id: [data?.id || null],
+      resumeId: [this.resumeId],
+      name: [data?.name || '', Validators.required],
+      level: [data?.level || '', Validators.required],
     });
   };
 
-  public createLanguageGroup = (): FormGroup => {
+  public createLanguageGroup = (data?: Language): FormGroup => {
     return this.fb.group({
-      language: ['', Validators.required],
-      level: ['', Validators.required],
+      id: [data?.id || null],
+      resumeId: [this.resumeId],
+      language: [data?.language || '', Validators.required],
+      level: [data?.level || '', Validators.required],
     });
   };
 
-  public createHobbieGroup = (): FormGroup => {
-    return this.fb.group({ name: ['', Validators.required] });
+  public createHobbieGroup = (data?: Hobby): FormGroup => {
+    return this.fb.group({
+      id: [data?.id || null],
+      resumeId: [this.resumeId],
+      name: [data?.name || '', Validators.required],
+    });
   };
 
   public resumeForm: FormGroup = this.fb.group({
-    personalDetails: this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, Validators.minLength(7)]],
-      title: ['', Validators.required],
-      address: ['', Validators.required],
-      summary: ['', Validators.required],
-    }),
-    education: this.fb.array([this.createEducationGroup()]),
-    experience: this.fb.array([this.createExperienceGroup()]),
-    skills: this.fb.array([this.createSkillGroup()]),
-    languages: this.fb.array([this.createLanguageGroup()]),
-    hobbies: this.fb.array([this.createHobbieGroup()]),
+    education: this.fb.array([]),
+    experience: this.fb.array([]),
+    skills: this.fb.array([]),
+    languages: this.fb.array([]),
+    hobbies: this.fb.array([]),
   });
 
   ngOnInit(): void {
-    const dataFromLocalStorage = this.ResumeService.getLastFormData();
-
-    if (dataFromLocalStorage) {
-      this.patchFormWhithResume(dataFromLocalStorage);
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      this.resumeId = Number(idParam);
+      this.loadResumeData();
     }
+    this.setupFormStream();
+  }
 
-    this.resumeForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((value) => {
-      this.ResumeService.setFormData(value as Resume);
+  private setupFormStream(): void {
+    this.resumeForm.valueChanges
+      .pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef))
+      .subscribe((formData) => {
+        this.resumeService.setResumeState(formData as Resume);
+      });
+  }
+
+  public onSectionOpen(sectionKey: string): void {
+    const formArray = this.getFormArray(sectionKey);
+
+    if (formArray.length === 0) {
+      this.addItem(sectionKey);
+    }
+  }
+
+  private loadResumeData(): void {
+    this.resumeService
+      .getResumeById(this.resumeId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((resumeBackendData) => {
+        const backendAny = resumeBackendData as any;
+        const normalizedData = {
+          ...resumeBackendData,
+          personalDetails: resumeBackendData.user?.personalDetails,
+          education: backendAny.educations || [],
+          experience: backendAny.experiences || [],
+          skills: resumeBackendData.skills || [],
+          languages: resumeBackendData.languages || [],
+          hobbies: resumeBackendData.hobbies || [],
+        };
+
+        this.fillFormArray('skills', normalizedData.skills, this.createSkillGroup);
+        this.fillFormArray('education', normalizedData.education, this.createEducationGroup);
+        this.fillFormArray('experience', normalizedData.experience, this.createExperienceGroup);
+        this.fillFormArray('languages', normalizedData.languages, this.createLanguageGroup);
+        this.fillFormArray('hobbies', normalizedData.hobbies, this.createHobbieGroup);
+
+        this.resumeService.setResumeState(normalizedData);
+      });
+  }
+
+  private fillFormArray<T>(key: string, data: T[], createGroupFn: (item: T) => FormGroup): void {
+    const formArray = this.getFormArray(key);
+    formArray.clear();
+
+    const safeData = data || [];
+
+    safeData.forEach((item) => {
+      const group = createGroupFn(item);
+      formArray.push(group);
+
+      this.listenToGroupChanges(key, group);
     });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private patchFormWhithResume(data: Resume) {
-    this.resumeForm.patchValue(data);
   }
 
   public getFormArray(key: string): FormArray {
     return this.resumeForm.get(key) as FormArray;
   }
 
-  public addItem(key: string, createGroup: () => FormGroup): void {
-    this.getFormArray(key).push(createGroup());
+  private listenToGroupChanges(sectionKey: string, group: FormGroup): void {
+    group.valueChanges
+      .pipe(
+        debounceTime(1000),
+        filter((val) => !!val.id),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+        switchMap((val) => {
+          return this.getUpdate(sectionKey, val.id, val);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => console.log(`${sectionKey} item updated`));
+  }
+
+  private getUpdate(sectionKey: string, id: number, data: unknown): Observable<unknown> {
+    switch (sectionKey) {
+      case 'skills':
+        return this.resumeService.updateSkill(id, data as Skill);
+      case 'experience':
+        return this.resumeService.updateExperience(id, data as Experience);
+      case 'education':
+        return this.resumeService.updateEducation(id, data as Education);
+      case 'languages':
+        return this.resumeService.updateLanguage(id, data as Language);
+      case 'hobbies':
+        return this.resumeService.updateHobby(id, data as Hobby);
+      default:
+        console.warn(`no method for section: ${sectionKey}`);
+        return of(null);
+    }
+  }
+
+  private getDelete(sectionKey: string, id: number): Observable<unknown> {
+    switch (sectionKey) {
+      case 'skills':
+        return this.resumeService.deleteSkill(id);
+      case 'education':
+        return this.resumeService.deleteEducation(id);
+      case 'experience':
+        return this.resumeService.deleteExperience(id);
+      case 'languages':
+        return this.resumeService.deleteLanguage(id);
+      case 'hobbies':
+        return this.resumeService.deleteHobby(id);
+      default:
+        console.warn(`no method for section: ${sectionKey}`);
+        return of(null);
+    }
+  }
+
+  public addItem(sectionKey: string): void {
+    const baseData = { resumeId: this.resumeId };
+
+    switch (sectionKey) {
+      case 'skills': {
+        const skillPayload = {
+          ...baseData,
+          name: '',
+          level: 'Beginner' as const,
+        };
+        this.resumeService.addSkill(skillPayload).subscribe((response: { skill: Skill }) => {
+          const group = this.createSkillGroup(response.skill);
+          this.addAndListen('skills', group);
+        });
+        break;
+      }
+
+      case 'education': {
+        const eduPayload = {
+          ...baseData,
+          university: '',
+          degree: '',
+          startDate: null,
+          endDate: null,
+        };
+        this.resumeService
+          .addEducation(eduPayload)
+          .subscribe((response: { message: string; education: Education }) => {
+            const group = this.createEducationGroup(response.education);
+            this.addAndListen('education', group);
+          });
+        break;
+      }
+
+      case 'experience': {
+        const expPayload = {
+          ...baseData,
+          company: '',
+          role: '',
+          duration: '',
+        };
+        this.resumeService
+          .addExperience(expPayload)
+          .subscribe((response: { message: string; experience: Experience }) => {
+            const group = this.createExperienceGroup(response.experience);
+            this.addAndListen('experience', group);
+          });
+        break;
+      }
+
+      case 'languages': {
+        const langPayload = { ...baseData, language: '', level: '' };
+        this.resumeService
+          .addLanguage(langPayload)
+          .subscribe((response: { message: string; language: Language }) => {
+            const group = this.createLanguageGroup(response.language);
+            this.addAndListen('languages', group);
+          });
+        break;
+      }
+
+      case 'hobbies': {
+        const hobbyPayload = { ...baseData, name: '' };
+        this.resumeService
+          .addHobby(hobbyPayload)
+          .subscribe((response: { message: string; hobby: Hobby }) => {
+            const group = this.createHobbieGroup(response.hobby);
+            this.addAndListen('hobbies', group);
+          });
+        break;
+      }
+    }
+  }
+
+  private addAndListen(sectionKey: string, group: FormGroup): void {
+    this.getFormArray(sectionKey).push(group);
+    this.listenToGroupChanges(sectionKey, group);
+    this.changeDetectionRef.markForCheck();
   }
 
   public removeItem(key: string, index: number): void {
-    this.getFormArray(key).removeAt(index);
+    const array = this.getFormArray(key);
+    const item = array.at(index).value;
+
+    this.getDelete(key, item.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          array.removeAt(index);
+
+          this.changeDetectionRef.markForCheck();
+        },
+        error: (err) => {
+          console.error('failed to delete item', err);
+        },
+      });
   }
 
-  public clearAll(): void {
-    this.resumeForm.reset();
-    this.ResumeService.clearStorage();
+  public get isValid(): boolean {
+    return this.resumeForm.valid;
   }
 
-  public saveDraft(): void {
-    const currentData: Resume = this.resumeForm.getRawValue();
-    console.log(currentData);
-    this.ResumeService.saveToStorage(currentData);
+  public markAsTouched(): void {
+    this.resumeForm.markAllAsTouched();
   }
 
-  public hasSection(sectionKey: string): boolean {
-    return this.resumeForm.contains(sectionKey);
+  public getSectionControl(key: string): AbstractControl | null {
+    return this.resumeForm.get(key);
   }
-
-  public addSection(sectionKey: string) {
-    if (this.hasSection(sectionKey)) {
-      return;
-    }
-
-    if (['signature', 'hobbies'].includes(sectionKey)) {
-      this.resumeForm.addControl(sectionKey, this.fb.control(''));
-    } else {
-      this.resumeForm.addControl(sectionKey, this.fb.array([]));
-    }
-  }
-
-  public removeSection(sectionKey: string) {
-    this.resumeForm.removeControl(sectionKey);
-  }
-}
+} // use in html

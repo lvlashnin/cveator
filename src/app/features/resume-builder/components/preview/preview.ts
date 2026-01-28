@@ -1,18 +1,31 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { combineLatest, map } from 'rxjs';
 import { ResumeService } from '../../../../core/services/resume';
-// import { AsyncPipe } from '@angular/common';
-import { Resume } from '../../../../core/interfaces/resume';
-// import { Subscription } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
-// import { Subject, takeUntil } from 'rxjs';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-preview',
-  // imports: [AsyncPipe],
   templateUrl: './preview.html',
   styleUrl: './preview.scss',
+  imports: [DatePipe],
 })
 export class Preview {
-  private resumeSrvice = inject(ResumeService);
-  public formData = toSignal<Resume | null | undefined>(this.resumeSrvice.getFormData());
+  private resumeService = inject(ResumeService);
+
+  private resumeForm$ = this.resumeService.getResumeState();
+
+  private details$ = this.resumeService.getUserProfile(1).pipe(map((user) => user.personalDetails));
+
+  public data = toSignal(
+    combineLatest([this.resumeForm$, this.details$]).pipe(
+      map(([resumeData, personalDetails]) => {
+        console.log('Combining data for preview:', { resumeData, personalDetails });
+        return {
+          ...resumeData,
+          personalDetails: personalDetails,
+        };
+      }),
+    ),
+  );
 }

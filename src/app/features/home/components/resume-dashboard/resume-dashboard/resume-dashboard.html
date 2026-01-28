@@ -1,0 +1,65 @@
+<div class="actions-grid">
+  <mat-card class="action-card" routerLink="/builder">
+    <mat-card-header>
+      <mat-card-title>Create CV</mat-card-title>
+      <mat-card-subtitle>Create a new CV</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-icon class="large-icon">description</mat-icon>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button color="primary" (click)="createNewResume()">Start</button>
+    </mat-card-actions>
+  </mat-card>
+  <mat-card class="action-card" routerLink="/builder">
+    <mat-card-header>
+      <mat-card-title>Create Cover Letter</mat-card-title>
+      <mat-card-subtitle>Create a new Cover Letter</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-icon class="large-icon">mail</mat-icon>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button color="primary">Start</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<div class="dashboard-container">
+  <div class="header">
+    <h1>My Resumes</h1>
+    <button mat-raised-button color="primary" (click)="createNewResume()">
+      <mat-icon>add</mat-icon> Create New
+    </button>
+  </div>
+
+  <div class="resume-list">
+    @if (resumes().length > 0) {
+    @for (resume of resumes(); track resume.id) {
+    <div class="resume-card">
+      <div class="card-content">
+        <h3>{{ resume.title }}</h3>
+        <p class="date">Last updated: {{ resume.updatedAt | date:'mediumDate' }}</p>
+        <button (click)="openResume(resume.id)">Open</button>
+      </div>
+
+      <div class=" card-actions">
+        <button mat-icon-button color="primary" (click)="openResume(resume.id)" title="Edit">
+          <mat-icon>edit</mat-icon>
+        </button>
+
+        <button mat-icon-button color="warn" (click)="deleteResume(resume.id)" title="Delete">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+    }
+    } @else {
+    <div class="empty-state">
+      <p>You don't have any resumes yet.</p>
+      <button mat-button (click)="createNewResume()">Create one now</button>
+    </div>
+    }
+  </div>
+</div>
