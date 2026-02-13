@@ -37,8 +37,7 @@ export class ResumeDashboard implements OnInit {
   }
 
   public createNewResume(): void {
-    const userId = 1;
-    this.resumeService.createResume(userId).subscribe({
+    this.resumeService.createResume().subscribe({
       next: (newResume) => {
         this.router.navigate(['/builder', newResume.id]);
       },

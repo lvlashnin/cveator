@@ -1,34 +1,47 @@
-const { User, PersonalDetails } = require('../models');
+const { PersonalDetails } = require('../models');
 
-exports.getUserProfile = async (req, res) => {
+exports.getPersonalDetails = async (req, res) => {
   try {
-    const { id } = req.params;
+    const userId = req.user.id;
 
-    const user = await User.findByPk(id);
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    let details = await PersonalDetails.findOne({ where: { userId: id } });
-
-    if (!details) {
-      details = await PersonalDetails.create({
-        userId: id,
+    const [details, created] = await PersonalDetails.findOrCreate({
+      where: { userId: userId },
+      defaults: {
         fullName: '',
         email: '',
         phone: '',
-        jobTitle: '',
+        city: '',
         address: '',
+        jobTitle: '',
+      },
+    });
+
+    res.json(details);
+  } catch (error) {
+    console.error('Get details error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.updatePersonalDetails = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const updates = req.body;
+
+    let details = await PersonalDetails.findOne({ where: { userId } });
+
+    if (details) {
+      await details.update(updates);
+    } else {
+      details = await PersonalDetails.create({
+        ...updates,
+        userId: userId,
       });
     }
 
-    const userWithDetails = user.toJSON();
-    userWithDetails.personalDetails = details;
-
-    res.json(userWithDetails);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error fetching profile' });
+    res.json(details);
+  } catch (error) {
+    console.error('Update details error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

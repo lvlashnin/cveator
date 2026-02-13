@@ -7,7 +7,6 @@ export interface BaseEntity {
 export interface User extends BaseEntity {
   username: string;
   loginEmail: string;
-  passwordHash: string;
   personalDetails?: PersonalDetails;
   resumes?: Resume[];
 }
@@ -26,6 +25,7 @@ export interface PersonalDetails extends BaseEntity {
 export interface Resume extends BaseEntity {
   userId: number;
   user?: User;
+  personalDetails?: PersonalDetails;
   title: string;
   summary?: string;
   experience?: Experience[];

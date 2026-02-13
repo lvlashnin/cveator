@@ -30,22 +30,22 @@ export class Settings implements OnInit {
   });
 
   ngOnInit(): void {
-    const userId = 1;
-    this.loadPersonalDetails(userId);
+    this.loadPersonalDetails();
   }
-  private loadPersonalDetails(userId: number): void {
+
+  private loadPersonalDetails(): void {
     this.resumeService
-      .getUserProfile(userId)
+      .getPersonalDetails()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (user) => {
-          if (user.personalDetails) {
-            console.log('Profile loaded:', user.personalDetails);
+        next: (personalDetails) => {
+          if (personalDetails) {
+            console.log('Profile loaded:', personalDetails);
 
-            this.personalDetails.patchValue(user.personalDetails);
+            this.personalDetails.patchValue(personalDetails);
 
             if (!this.personalDetails.value.id) {
-              this.personalDetails.patchValue({ id: user.personalDetails.id });
+              this.personalDetails.patchValue({ id: personalDetails.id });
             }
 
             this.setupAutoSave();
@@ -62,7 +62,7 @@ export class Settings implements OnInit {
         filter((val) => !!val.id),
         distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
         switchMap((formData) => {
-          return this.resumeService.updatePersonalDetails(formData.id, formData);
+          return this.resumeService.updatePersonalDetails(formData);
         }),
         takeUntilDestroyed(this.destroyRef),
       )

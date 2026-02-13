@@ -10,6 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { ResumeService } from '../../core/services/resume';
 import { filter, map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { AuthService } from '../../core/services/auth-service';
 
 @Component({
   selector: 'app-home',
@@ -29,6 +30,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class Home {
   private resumeService = inject(ResumeService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   public currentUrl = toSignal(
@@ -40,12 +42,16 @@ export class Home {
   );
 
   public createNewResume(): void {
-    const userId = 1;
-    this.resumeService.createResume(userId).subscribe({
+    this.resumeService.createResume().subscribe({
       next: (newResume) => {
         this.router.navigate(['/builder', newResume.id]);
       },
     });
+  }
+
+  public logOut() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
   public navLinks = [
     {

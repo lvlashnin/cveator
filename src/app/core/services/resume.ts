@@ -35,10 +35,9 @@ export class ResumeService {
     return this.http.get<Resume>(`${this.apiUrl}/resumes/${id}`);
   }
 
-  public createResume(userId: number): Observable<{ message: string; id: number | string }> {
-    return this.http.post<{ message: string; id: number | string }>(`${this.apiUrl}/resumes`, {
-      userId,
-    });
+  public createResume(): Observable<any> {
+    const body = { title: 'Untitled Resume' };
+    return this.http.post<{ message: string; id: number | string }>(`${this.apiUrl}/resumes`, body);
   }
 
   public updateResume(id: number | string, data: Resume): Observable<Resume> {
@@ -109,15 +108,15 @@ export class ResumeService {
     return this.http.delete(`${this.apiUrl}/hobbies/${id}`);
   }
 
-  public getPersonalDetails(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/personal-details/${id}`);
+  public getPersonalDetails(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/personal-details`);
   }
 
-  public updatePersonalDetails(id: number, changes: Partial<PersonalDetails>): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/personal-details/${id}`, changes);
+  public updatePersonalDetails(changes: Partial<PersonalDetails>): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/personal-details/`, changes);
   }
 
-  public getUserProfile(userId: number): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/users/${userId}`);
-  }
+  //   public getUserProfile(): Observable<User> {
+  //     return this.http.get<User>(`${this.apiUrl}/users/}`);
+  //   }
 }

@@ -11,7 +11,9 @@ const {
 
 exports.getAllResumes = async (req, res) => {
   try {
+    const currentUser = req.user.id;
     const resumes = await Resume.findAll({
+      where: { userId: currentUser },
       include: [
         {
           model: User,
@@ -67,8 +69,8 @@ exports.getResumeById = async (req, res) => {
 
 exports.createResume = async (req, res) => {
   try {
-    const userId = req.body.userId || 1;
-    const title = 'Untitled Resume';
+    const userId = req.user.id;
+    const { title } = req.body;
 
     const newResume = await Resume.create({ userId, title });
 

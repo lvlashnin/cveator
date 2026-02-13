@@ -9,7 +9,9 @@ const experienceRoutes = require('./experience.routes');
 const languageRoutes = require('./language.routes');
 const personalDetailsRoutes = require('./personalDetails.routes');
 const hobbyRoutes = require('./hobby.routes');
+const authRoutes = require('./auth.routes');
 
+router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/experiences', experienceRoutes);
 router.use('/educations', educationRoutes);

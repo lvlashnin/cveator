@@ -35,6 +35,11 @@ import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, filter, Observable, of, switchMap } from 'rxjs';
 
+import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
+import { ResumeActions } from '../../../../core/store/resume.actions';
+import { selectIsLoading } from '../../../../core/store/resume.selectors';
+
 export interface Section {
   key: string;
   label: string;
@@ -65,8 +70,11 @@ export class Editor implements OnInit {
   private route = inject(ActivatedRoute);
   private destroyRef: DestroyRef = inject(DestroyRef);
   private changeDetectionRef = inject(ChangeDetectorRef);
-
   private resumeId!: number;
+  private store = inject(Store);
+  private actions$ = inject(Actions);
+
+  public isLoading$ = this.store.select(selectIsLoading);
 
   public mainSections: Section[] = [
     { key: 'education', label: 'Education', icon: 'school' },
@@ -136,7 +144,8 @@ export class Editor implements OnInit {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.resumeId = Number(idParam);
-      this.loadResumeData();
+      this.store.dispatch(ResumeActions.loadResume({ id: this.resumeId }));
+      this.listenToLoadSuccess();
     }
     this.setupFormStream();
   }
@@ -145,7 +154,7 @@ export class Editor implements OnInit {
     this.resumeForm.valueChanges
       .pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef))
       .subscribe((formData) => {
-        this.resumeService.setResumeState(formData as Resume);
+        this.store.dispatch(ResumeActions.updateResumeLocalState({ resume: formData }));
       });
   }
 
@@ -157,29 +166,16 @@ export class Editor implements OnInit {
     }
   }
 
-  private loadResumeData(): void {
-    this.resumeService
-      .getResumeById(this.resumeId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((resumeBackendData) => {
-        const backendAny = resumeBackendData as any;
-        const normalizedData = {
-          ...resumeBackendData,
-          personalDetails: resumeBackendData.user?.personalDetails,
-          education: backendAny.educations || [],
-          experience: backendAny.experiences || [],
-          skills: resumeBackendData.skills || [],
-          languages: resumeBackendData.languages || [],
-          hobbies: resumeBackendData.hobbies || [],
-        };
-
-        this.fillFormArray('skills', normalizedData.skills, this.createSkillGroup);
-        this.fillFormArray('education', normalizedData.education, this.createEducationGroup);
-        this.fillFormArray('experience', normalizedData.experience, this.createExperienceGroup);
-        this.fillFormArray('languages', normalizedData.languages, this.createLanguageGroup);
-        this.fillFormArray('hobbies', normalizedData.hobbies, this.createHobbieGroup);
-
-        this.resumeService.setResumeState(normalizedData);
+  private listenToLoadSuccess(): void {
+    this.actions$
+      .pipe(ofType(ResumeActions.loadResumeSuccess), takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ resume }) => {
+        this.fillFormArray('skills', resume.skills || [], this.createSkillGroup);
+        this.fillFormArray('education', resume.education || [], this.createEducationGroup);
+        this.fillFormArray('experience', resume.experience || [], this.createExperienceGroup);
+        this.fillFormArray('languages', resume.languages || [], this.createLanguageGroup);
+        this.fillFormArray('hobbies', resume.hobbies || [], this.createHobbieGroup);
+        this.changeDetectionRef.markForCheck();
       });
   }
 
@@ -360,4 +356,4 @@ export class Editor implements OnInit {
   public getSectionControl(key: string): AbstractControl | null {
     return this.resumeForm.get(key);
   }
-} // use in html
+}

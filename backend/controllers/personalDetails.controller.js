@@ -2,8 +2,10 @@ const { PersonalDetails } = require('../models');
 
 exports.getPersonalDetails = async (req, res) => {
   try {
-    const { id } = req.params;
-    const personalDetails = await PersonalDetails.findByPk(id);
+    const userId = req.user.id;
+    const personalDetails = await PersonalDetails.findOne({
+      where: { userId: userId },
+    });
 
     if (!personalDetails) {
       return res.status(404).json({ message: 'personalDetails not found' });
@@ -41,14 +43,18 @@ exports.createPersonalDetails = async (req, res) => {
 
 exports.updatePersonalDetails = async (req, res) => {
   try {
-    const { id } = req.params;
+    const userId = req.user.id;
 
     const changes = req.body;
 
-    const details = await PersonalDetails.findByPk(id);
+    const details = await PersonalDetails.findOne({ where: { userId } });
 
     if (!details) {
-      return res.status(404).json({ message: 'Personal details not found' });
+      details = await PersonalDetails.create({
+        ...changes,
+        userId: userId,
+      });
+      return res.status(200).json({ message: 'Personal details created' });
     }
 
     await details.update(changes);
